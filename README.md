@@ -1,9 +1,10 @@
-## conference tweets analysis
+# Analiza tvitova sa konferencije
 
 
 ### Cilj 
 
 Cilj ovog projekta je pokušaj merenja uspešnosti naučne konferencije/skupa na osnovu tvitova učesnika. Osim analize sentimenta tvitova, koji bi dali ocenu opšteg utiska učesnika, rad će pokušati da izmeri i stvarnu "dobit" učesnika, koja bi se ogledala u ostvarenim kontaktima i novim informacijama. Novi kontakti će se pratiti kroz ostvarenu komunikaciju primenom metoda analize društvenih mreža, a uticaj izlaganja i predavanja putem analize teksta tvitova. Obe vrste analiza će biti sprovedene nad podacima podeljenim na vremenske segmente pre, tokom i posle održavanja skupa, tako da bi uočene promene govorile o dobiti učesnika.
+
 
 
 ### Pitanja
@@ -24,6 +25,7 @@ Analizom teksta tvitova, rad će pokušati da otkrije sledeće:
 * Da li "angažovaniji učesnici" imaju veću "informacionu dobit"?
 
 
+
 ### Podaci
 
 U radu su koriščeni podaci o tvitovima i učesnicima IEEE Women in Engineering International Leadership Conference, konferencije održane 22-23.05.2017. godine. Prvo su, u vreme trajanja skupa i odmah posle toga, prikupljeni tvitovi sa ključnim rečima #WIELEad i @wieilc (oznaka skupa i organizator), a zatim je određen okvir od tri dana pre i posle skupa kao prošireni period trajanja skupa, koji dozvoljava i učesnicima koji su tvitovali nešto pre ili posle skupa da budu uključeni u analizu. Za sve učesnike koji su tvitovali unutar tog perioda preuzeti su svi tvitovi, odnosno maksimalan broj tvitova koji twitterAPI dozvoljava (3200). Od ukupnog broja učesnika, u analizu nisu ušli učesnici koji su obrisali nalog, podesili nalog kao 'protected', ili nisu imali dostupne tvitove počev od 21.04.2017. godine. Na kraju, tako prikupljeni tvitovi su podeljeni na pet vremenskih odeljaka, dva odeljka od po dve nedelje pre skupa, odeljak trajanja skupa, uključujući i tri dana pre i tri dana posle, ukupno osam dana, i dva odeljka od po dve nedelje posle skupa. Ovakva vremenska podela je posledica pretpostavke da će uticaj skupa postepeno da se smanjuje i da period posle skupa ne može da se posmatra kao jedna celina. Ukupan period koji je ušao u analizu je 21.04-23.06.2017.
@@ -34,6 +36,7 @@ Svi tvitovi se nalaze u direktorijumu 'data', kao serijalizovani R objekti:
 * all_tweets 1:4 sadrže tvitove prikupljane po učesniku (fajl je podeljen na 4 dela samo zbog ograničenja postavljanja velikih fajlova na GitHub); ~82MB
 
 Za kreiranje mreže i mrežne analize su korišćene funkcije iz paketa igraph (v 1.1.2). Matrica povezanosti je kreirana tako da se svako pominjanje jednog učesnika u tvitu drugog posmatra kao usmerena veza, a težina veze predstavlja broj pominjanja.
+
 
 
 ### Analiza
@@ -63,10 +66,12 @@ Na kraju, analiziraće se korelacija između centralnosti učesnika i rezultata 
 Teme skupa će biti identifikovane u programu skupa, a zastupljenost tema u tvitovima će se meriti poklapanjem reči iz tvitova sa ključnim rečima određenih tema.
 
 
+
 ### Zaključci analize
 
 Analizom mreže je ustanovljeno da veliki broj učesnika nije komunicirao pre skupa i da je tokom skupa ostvario nove kontakte, međutim, po završetku skupa komunikacija je bila na nivou od pre skupa, dakle kontakti nisu ostali trajni. Komunikacija u toku skupa nije bila ujednačena, mreža je u dobroj meri centralizovana, odnosno ima manji broj centralnih učesnika, a u kombinaciji sa malom tranzitivnošću i rezultatima o klikama i jezgrima, može se reći da se učesnici nisu u većoj meri povezali međusobno, i da struktura mreže može da odgovara drvolikoj. Ovakva struktura bi mogla da objasni brzo raspadanje mreže posle skupa. Ipak, izdvajanje centralnog učesnika, tj. organizatora, iz mreže (u periodu trajanja skupa), nije dovelo do razbijanja mreže na komponente, iako je jedan manji broj učesnika ostao nepovezan. Ovo bi odgovaralo strukturi sa nekoliko centralnih čvorova i potvrdilo metriku centralizovanosti (0.47-0.6). Takođe, veliki broj identifikovanih klastera govori o velikoj podeljenosti mreže i heterogenosti komunikacije, što takođe objašnjava izostajanje komunikacije posle skupa.
 
 
 
+***
 Ovaj projekat predstavlja ispitni rad za ispite Softverska analiza društvenih mreža i Primene veštačke inteligencije na grupi Softversko inženjerstvo i računarske nauke master studija Fakulteta organizacionih nauka u Beogradu.
