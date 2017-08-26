@@ -1,9 +1,10 @@
-# Analiza tvitova sa konferencije
+# Analiza tvitova sa konferencije 
+
 
 
 ### Cilj 
 
-Cilj ovog projekta je pokušaj merenja uspešnosti naučne konferencije/skupa na osnovu tvitova učesnika. Osim analize sentimenta tvitova, koji bi dali ocenu opšteg utiska učesnika, rad će pokušati da izmeri i stvarnu "dobit" učesnika, koja bi se ogledala u ostvarenim kontaktima i novim informacijama. Novi kontakti će se pratiti kroz ostvarenu komunikaciju primenom metoda analize društvenih mreža, a uticaj izlaganja i predavanja putem analize teksta tvitova. Obe vrste analiza će biti sprovedene nad podacima podeljenim na vremenske segmente pre, tokom i posle održavanja skupa, tako da bi uočene promene govorile o dobiti učesnika.
+Cilj ovog projekta je pokušaj merenja uspešnosti naučne konferencije/skupa na osnovu tvitova učesnika. Osim analize sentimenta tvitova, koji bi dali ocenu opšteg utiska učesnika, rad će pokušati da izmeri i stvarnu "dobit" učesnika, koja bi se ogledala u ostvarenim kontaktima i novim informacijama. Novi kontakti će se pratiti kroz ostvarenu komunikaciju primenom metoda analize društvenih mreža, a uticaj izlaganja i predavanja putem analize teksta tvitova. Obe vrste analiza će biti sprovedene nad podacima podeljenim na vremenske segmente pre, tokom i posle održavanja skupa, tako da bi uočene promene govorile o dobiti učesnika.  
 
 
 
@@ -22,7 +23,7 @@ Analizom teksta tvitova, rad će pokušati da otkrije sledeće:
 * Koliko su informacije nove za učesnike?
 * Koliko teme skupa utiču na učesnike posle skupa?
 * Koliko je tema interesantna za učesnike?
-* Da li "angažovaniji učesnici" imaju veću "informacionu dobit"?
+* Da li "angažovaniji učesnici" imaju veću "informacionu dobit"?  
 
 
 
@@ -35,7 +36,7 @@ Svi tvitovi se nalaze u direktorijumu 'data', kao serijalizovani R objekti:
 * startertweets sadrži tvitove prikupljene za vreme trajanja skupa; ~130kB
 * all_tweets 1:4 sadrže tvitove prikupljane po učesniku (fajl je podeljen na 4 dela samo zbog ograničenja postavljanja velikih fajlova na GitHub); ~82MB
 
-Za kreiranje mreže i mrežne analize su korišćene funkcije iz paketa igraph (v 1.1.2). Matrica povezanosti je kreirana tako da se svako pominjanje jednog učesnika u tvitu drugog posmatra kao usmerena veza, a težina veze predstavlja broj pominjanja.
+Za kreiranje mreže i mrežne analize su korišćene funkcije iz paketa igraph (v 1.1.2). Matrica povezanosti je kreirana tako da se svako pominjanje jednog učesnika u tvitu drugog posmatra kao usmerena veza, a težina veze predstavlja broj pominjanja.  
 
 
 
@@ -54,22 +55,22 @@ Za merenje homogenosti mreže u odnosu na komunikaciju korišćene su sledeće m
 * određivanje klastera, koji govore o podeljenosti mreže
 * analiza mreže bez glavnog organizatora (čvor sa najvećim stepenom)
 
-Na pitanje o komunikaciji posle skupa odgovoreno je tumačenjem rezultata iz prethodnih analiza.
+Na pitanje o komunikaciji posle skupa odgovoreno je tumačenjem rezultata iz prethodnih analiza.  
 Određeni su i centralni učesnici prema četiri mere centralnosti, a kasnije će se videti njihova uloga u temama komunikacije.
 
-U analizi teksta odrediće se opšti utisak o skupu putem analize sentimenta tvitova.
-Koliko su teme skupa nove za učesnike meriće se preko zastupljenosti tema skupa u tvitovima učesnika pre i tokom skupa. 
-Uticaj skupa na učesnike meriće se putem zastupljenosti tema skupa u tvitovima učesnika tokom i posle skupa.
-Interesantnost izlaganja će se meriti preko učestanosti komuniciranja o temama skupa, odnosno zastupljenosti tvitova o temama skupa u odnosu na ukupan broj tvitova.
+U analizi teksta odrediće se opšti utisak o skupu putem analize sentimenta tvitova.  
+Koliko su teme skupa nove za učesnike meriće se preko zastupljenosti tema skupa u tvitovima učesnika pre i tokom skupa.  
+Uticaj skupa na učesnike meriće se putem zastupljenosti tema skupa u tvitovima učesnika tokom i posle skupa.  
+Interesantnost izlaganja će se meriti preko učestanosti komuniciranja o temama skupa, odnosno zastupljenosti tvitova o temama skupa u odnosu na ukupan broj tvitova.  
 Na kraju, analiziraće se korelacija između centralnosti učesnika i rezultata o "informacionoj dobiti". 
 
-Teme skupa će biti identifikovane u programu skupa, a zastupljenost tema u tvitovima će se meriti poklapanjem reči iz tvitova sa ključnim rečima određenih tema.
+Teme skupa će biti identifikovane u programu skupa, a zastupljenost tema u tvitovima će se meriti poklapanjem reči iz tvitova sa ključnim rečima određenih tema.  
 
 
 
 ### Zaključci analize
 
-Analizom mreže je ustanovljeno da veliki broj učesnika nije komunicirao pre skupa i da je tokom skupa ostvario nove kontakte, međutim, po završetku skupa komunikacija je bila na nivou od pre skupa, dakle kontakti nisu ostali trajni. Komunikacija u toku skupa nije bila ujednačena, mreža je u dobroj meri centralizovana, odnosno ima manji broj centralnih učesnika, a u kombinaciji sa malom tranzitivnošću i rezultatima o klikama i jezgrima, može se reći da se učesnici nisu u većoj meri povezali međusobno, i da struktura mreže može da odgovara drvolikoj. Ovakva struktura bi mogla da objasni brzo raspadanje mreže posle skupa. Ipak, izdvajanje centralnog učesnika, tj. organizatora, iz mreže (u periodu trajanja skupa), nije dovelo do razbijanja mreže na komponente, iako je jedan manji broj učesnika ostao nepovezan. Ovo bi odgovaralo strukturi sa nekoliko centralnih čvorova i potvrdilo metriku centralizovanosti (0.47-0.6). Takođe, veliki broj identifikovanih klastera govori o velikoj podeljenosti mreže i heterogenosti komunikacije, što takođe objašnjava izostajanje komunikacije posle skupa.
+Analizom mreže je ustanovljeno da veliki broj učesnika nije komunicirao pre skupa i da je tokom skupa ostvario nove kontakte, međutim, po završetku skupa komunikacija je bila na nivou od pre skupa, dakle kontakti nisu ostali trajni. Komunikacija u toku skupa nije bila ujednačena, mreža je u dobroj meri centralizovana, odnosno ima manji broj centralnih učesnika, a u kombinaciji sa malom tranzitivnošću i rezultatima o klikama i jezgrima, može se reći da se učesnici nisu u većoj meri povezali međusobno, i da struktura mreže može da odgovara drvolikoj. Ovakva struktura bi mogla da objasni brzo raspadanje mreže posle skupa. Ipak, izdvajanje centralnog učesnika, tj. organizatora, iz mreže (u periodu trajanja skupa), nije dovelo do razbijanja mreže na komponente, iako je jedan manji broj učesnika ostao nepovezan. Ovo bi odgovaralo strukturi sa nekoliko centralnih čvorova i potvrdilo metriku centralizovanosti (0.47-0.6). Takođe, veliki broj identifikovanih klastera govori o velikoj podeljenosti mreže i heterogenosti komunikacije, što takođe objašnjava izostajanje komunikacije posle skupa.  
 
 
 
