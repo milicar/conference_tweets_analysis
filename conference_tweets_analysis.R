@@ -103,7 +103,7 @@ dl_tweets <-function(user_list, num_tweets, rts = TRUE, verbose = FALSE) {
 ### za te ucesnike i taj vremenski period 
 
 # all_tweets <- dl_tweets(participants, 3200)
-all_tweets <- readRDS("all_tweets")
+all_tweets <- rbind(readRDS("all_tweets1"), readRDS("all_tweets2"), readRDS("all_tweets3"), readRDS("all_tweets4"))
 
 my_subset <- function(tweets, from_incl, to_incl){
   tweets <- mutate(tweets, "date" = as.Date(tweets$created))
