@@ -1,6 +1,8 @@
 ### Analiza
 ### Kombinovane metode analize drustvenih mreza i analize teksta
 
+library(igraph)
+conf_graph_list <- readRDS("results/list_of_conf_graphs_after_1st.RData")
 
 ### 4. Ko su centralni ucesnici i kako uticu na teme komunikacije? 
 

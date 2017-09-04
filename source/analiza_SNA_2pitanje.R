@@ -1,5 +1,11 @@
-### Analiza 
+### Analiza podataka
 ### Mrezne metrike
+
+library(dplyr)
+library(igraph)
+library(scales)
+conf_graph_list <- readRDS("results/list_of_conf_graphs_after_1st.RData")
+
 
 ### 2. Da li svi ucesnici ujednaceno komuniciraju ili se stvaraju grupe sa intenzivnijom komunikacijom? 
 
@@ -12,13 +18,16 @@ deg_dist <- lapply(conf_graph_list, function(x) {
   res$dd_out <- degree.distribution(x, mode = "out")
   return(res)})
 
+periods <- c("from 2017-04-21 to 2017-05-04", "from 2017-05-05 to 2017-05-18", "from 2017-05-19 to 2017-05-26", 
+             "from 2017-05-27 to 2017-06-09", "from 2017-06-10 to 2017-06-23")
+
 
 # pdf("2_deg_distribution.pdf")
 # lapply(1:length(deg_dist), function(x){ 
 #   xmax <- max(sapply(deg_dist[[x]], length))
 #   ymax <- max(sapply(deg_dist[[x]], max))
 #   plot(c(0,xmax), c(0,ymax), type = "n", xlab = "degree", ylab = "frequency", 
-#        main = paste("Degree distribution\n", graph_title[x]) )
+#        main = paste("Degree distribution\n", periods[x]) )
 #   lines(deg_dist[[x]]$dd_all, col = "red", lwd = 5)
 #   lines(deg_dist[[x]]$dd_in, col = "green", lwd = 3)
 #   lines(deg_dist[[x]]$dd_out, col = "purple", lwd = 2)
@@ -28,12 +37,12 @@ deg_dist <- lapply(conf_graph_list, function(x) {
 # dev.off()
 
 TODO # vrednosti stepena ne treba da krecu od 1, nego od 0..
-pdf("2_deg_distribution_log.pdf")
+pdf("visuals/2_deg_distribution_log.pdf")
 lapply(1:length(deg_dist), function(x){ 
   xmax <- max(sapply(deg_dist[[x]], length))
   ymax <- max(sapply(deg_dist[[x]], max))
   plot(c(0.9,xmax), c(0.002,ymax), log = "xy", type = "n", xlab = "degree", ylab = "frequency", 
-       main = paste("Degree distribution\n", graph_title[x]) )
+       main = paste("Degree distribution\n", periods[x]) )
   lines(deg_dist[[x]]$dd_all, col = "red", lwd = 2, type = "o")
   lines(deg_dist[[x]]$dd_in, col = "green", lwd = 2, type = "o")
   lines(deg_dist[[x]]$dd_out, col = "purple", lwd = 2, type = "o")
@@ -83,7 +92,9 @@ conf_degs_anlys_mat <- matrix(unlist(conf_degs_anlys), ncol = 3, byrow = TRUE, d
 ### pojedinacnih ucesnika. Kombinovanjem informacija o stepenu i broju tvitova iz originalnog skupa moze da se prati obim
 ### interakcija ucesnika sa razlicitim brojem tvitova o skupu.
 
-pdf("2_stepen_all.pdf")
+yellowred <- rev(rainbow(26, start = 0, end = 1/6)) 
+
+pdf("visuals/2_degree_all.pdf")
 lapply(conf_graph_list, function(x) { plot(x, layout = layout_with_fr(x), frame = TRUE, margin = c(0.2, 0, 0, 0),
                                            main = x$title, sub = "users with total degree and number of tweets with #WIELead or @wieilc", vertex.label = NA, 
                                            vertex.size = rescale(degree(x, mode = "all"), to = c(2, 10)), vertex.color = yellowred[round(rescale(log(V(x)$nstarttw), to = c(0,26)))],
@@ -113,23 +124,23 @@ conf_transitivity <- sapply(conf_graph_list, transitivity, type = "global", isol
 ### Za izracunavanje klika, kao i za dalje analize i vizuelizacije, zgodno je izbaciti izolate.
 
 conf_no_iso_graph_list <- lapply(conf_graph_list, function(x) {res <- delete_vertices(x, V(x)[degree(x) == 0])} )
-conf_no_iso_undirected <- lapply(conf_no_iso_graph_list, as.undirected, mode = "mutual")
+conf_no_iso_mutual <- lapply(conf_no_iso_graph_list, as.undirected, mode = "mutual")
 
-conf_largest_clique <- sapply(conf_no_iso_undirected, clique_num) # velicina najvece klike (sa najvecim brojem clanova)
+conf_largest_clique <- sapply(conf_no_iso_mutual, clique_num) # velicina najvece klike (sa najvecim brojem clanova)
 # time_1 -> time_5 :  3      3      4      3      3 
 
-conf_largest_cliques_list <- lapply(conf_no_iso_undirected, largest_cliques) # lista najvecih klika
+conf_largest_cliques_list <- lapply(conf_no_iso_mutual, largest_cliques) # lista najvecih klika
 conf_n_largest_cliques <- sapply(conf_largest_cliques_list, length) # broj najvecih klika
 # time_1 -> time_5 :  2      4      3      2      2
 
-conf_max_cliques_list <- lapply(conf_no_iso_undirected, max_cliques, min = 3) # lista maksimalnih klika (koje nisu podgraf vece klike)
-conf_n_max_cliques <- sapply(conf_no_iso_undirected, count_max_cliques, min = 3) # broj maksimalnih klika (od barem 3 cvora)
+conf_max_cliques_list <- lapply(conf_no_iso_mutual, max_cliques, min = 3) # lista maksimalnih klika (koje nisu podgraf vece klike)
+conf_n_max_cliques <- sapply(conf_no_iso_mutual, count_max_cliques, min = 3) # broj maksimalnih klika (od barem 3 cvora)
 # time_1 -> time_5 :  2      4     49      2      2
 
 ### Klika je sama po sebi dosta restriktivna mera, a uz ovako definisane veze u mrezi, velicina najvece klike od cetiri 
 ### clana mozda i nije tako losa. Isto vazi i za broj maksimalnih klika u periodu odrzavanja skupa.
 
-conf_coreness <- lapply(conf_no_iso_undirected, coreness) # za svaki cvor, k jezgra kome pripada (stepen, ne broj clanova)
+conf_coreness <- lapply(conf_no_iso_mutual, coreness) # za svaki cvor, k jezgra kome pripada (stepen, ne broj clanova)
 conf_coreness_freqs <- lapply(conf_coreness, table) # frekvencije coreness vrednosti cvorova
 conf_coreness_max <- sapply(conf_coreness_freqs, function(x) max(as.numeric(names(x)))) # najveca coreness vrednost po mrezi
 # time_1 -> time_5 :   2      2      3      2      2 
@@ -164,6 +175,7 @@ conf_centralizations_matrix <- matrix( data = c(
                                                       c("time_1", "time_2", "time_3", "time_4", "time_5"))
 )
 
+conf_centralizations_matrix
 
 #**************************
 ### U vezi sa eigenvector centralnostima, funkcije koje ovo racunaju u igraph paketu oslanjaju se na ARPACK solver, i tu nesto
@@ -185,7 +197,7 @@ for (i in 1:10) {
 }
 res_undir
 
-eigen_dir <- list()
+eig_dir <- list()
 for(i in 1:10){
   eig_dir[[i]] <- eigen_centrality(conf_no_iso_graph_list[[5]], directed = TRUE, weights = NA)
 }
@@ -238,7 +250,7 @@ for(i in 1:length(conf_no_iso_graph_list)){
   }
 }
 
-pdf("2_clusters_wt.pdf")
+pdf("visuals/2_clusters_wt.pdf")
 lapply(conf_no_iso_graph_list, function(x) { 
   important <- names(sort(degree(x), decreasing = TRUE)[1:5])
   plot(x, layout = layout_with_fr(x), frame = TRUE, 
@@ -279,7 +291,7 @@ my_rainbow_wt80 <- rainbow(80, start = , end = 1)
 
 
 important2 <- names(sort(degree(conf_no_wieilc), decreasing = TRUE)[1:5])
-pdf("2_no_wieilc.pdf")
+pdf("visuals/2_no_wieilc.pdf")
 plot(conf_no_wieilc, layout = layout_with_fr(conf_no_wieilc), frame = TRUE, 
      main = "network without wieilc node\nnumber of clusters: 80\nfrom 2017-05-19 to 2017-05-26", 
      vertex.label = ifelse(V(conf_no_wieilc)$name %in% important2, V(conf_no_wieilc)$name, NA),
@@ -300,3 +312,5 @@ dev.off()
 ### klika i velicina jezgara (slaba medusobna povezanost "ne-centralnih" cvorova) i veliki broj klastera (velika 
 ### heterogenost mreze).
 
+saveRDS(conf_no_iso_graph_list, "results/list_of_conf_graphs_no_isolates_after_2nd.RData")
+saveRDS(conf_no_wieilc, "results/conf_graph3_no_wieilc_after_2nd.RData")

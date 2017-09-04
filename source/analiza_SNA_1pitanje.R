@@ -1,8 +1,11 @@
-library(igraph)
-library(scales)
-
 ### Analiza podataka
 ### Mrezne metrike
+
+library(dplyr)
+library(igraph)
+library(scales)
+conf_graph_list <- readRDS("results/list_of_conf_graphs.RData")
+
 
 ### 1. Da li su ucesnici komunicirali i pre skupa ili ostvarena komunikacija predstavlja nove kontakte? 
 
@@ -27,8 +30,9 @@ conf_comp_no_weak  #  time_1 -> time_5 : 243    262     13    265    275
 conf_comp_max_weak <- sapply(conf_components_weak, function(x) { max(x$csize) }) # najveca komponenta
 conf_comp_max_weak  # time_1 -> time_5 : 120    142    445    140    105 
 
-conf_comp_max_weak_ratio <- conf_comp_max_weak / length(unique(selected_tweets$screenName)) # procenat svih ucesnika u komp.
+conf_comp_max_weak_ratio <- conf_comp_max_weak / length(V(conf_graph_list[[3]])) # procenat svih ucesnika u komp.
 conf_comp_max_weak_ratio # => time_1 -> time_5 : 0.2625821 0.3107221 0.9737418 0.3063457 0.2297593 
+
 
 ### Ocekivano, broj komponenti je najmanji za vreme trajanja skupa, i tada je maksimalna komponenta najveca,
 ### obuhvata cak 97% ucesnika (u odnosu na 31% pre skupa), sto znaci da su gotovo svi ucesnici pomenuli barem 
@@ -48,7 +52,7 @@ conf_comp_no_strong  # time_1 -> time_5 : 358    388    324    397    388
 conf_comp_max_strong <- sapply(conf_components_strong, function(x) { max(x$csize) })
 conf_comp_max_strong  # time_1 -> time_5 :  10     22    132     21      9 
 
-conf_comp_max_strong_ratio <- conf_comp_max_strong / length(unique(selected_tweets$screenName))
+conf_comp_max_strong_ratio <- conf_comp_max_strong / length(V(conf_graph_list[[3]]))
 conf_comp_max_strong_ratio # time_1 -> time_5 : 0.02188184 0.04814004 0.28884026 0.04595186 0.01969365 
 
 ### Za jake komponente rezultati su donekle drugaciji - broj komponenti u vreme skupa je veliki, a maksimalna 
@@ -69,10 +73,12 @@ conf_comp_size_strong <- lapply(conf_components_strong, function(x) { table(x$cs
 comp_plot_colors <- c("blue", "red", "green", "orange", "purple")
 comp_plot_sizes <- c(5, 4, 3, 3, 2)
 comp_plot_titles <- c("Weak component sizes", "Strong component sizes")
+periods <- c("from 2017-04-21 to 2017-05-04", "from 2017-05-05 to 2017-05-18", "from 2017-05-19 to 2017-05-26", 
+             "from 2017-05-27 to 2017-06-09", "from 2017-06-10 to 2017-06-23")
 
 comp_sizes1 <- list(conf_comp_size_weak, conf_comp_size_strong)
 
-pdf("1_component_sizes.pdf")
+pdf("visuals/1_component_sizes.pdf")
 lapply(1:length(comp_sizes1), function(x){
   xmax <- max(sapply(comp_sizes1[[x]], function(y) max(as.numeric(names(y)))))
   ymax <- max(sapply(comp_sizes1[[x]], max))
@@ -81,7 +87,7 @@ lapply(1:length(comp_sizes1), function(x){
   lapply(1:length(comp_sizes1[[x]]), function(z){
     lines(comp_sizes1[[x]][[z]], type = "o", col = comp_plot_colors[z], lwd = comp_plot_sizes[z])
   })
-  legend("topright", legend = graph_title, lwd = comp_plot_sizes, col = comp_plot_colors)
+  legend("topright", legend = periods, lwd = comp_plot_sizes, col = comp_plot_colors)
 })
 dev.off()
 
@@ -109,7 +115,7 @@ conf_comp_no_mutual # time_1 -> time_5 : 360    395    340    398    391
 
 conf_comp_max_mutual <- sapply(conf_components_mutual, function(x) { max(x$csize) })
 conf_comp_max_mutual # time_1 -> time_5 :    10     13    114     21      4 
-conf_comp_max_mutual_ratio <- conf_comp_max_mutual / (length(unique(selected_tweets$screenName)))
+conf_comp_max_mutual_ratio <- conf_comp_max_mutual / length(V(conf_graph_list[[3]]))
 conf_comp_max_mutual_ratio  # time_1 -> time_5 : 0.021881838 0.028446389 0.249452954 0.045951860 0.008752735
 
 
@@ -118,7 +124,8 @@ conf_comp_size_mutual <- lapply(conf_components_mutual, function(x) { table(x$cs
 comp_sizes2 <- list(conf_comp_size_weak, conf_comp_size_strong, conf_comp_size_mutual)
 comp_plot_titles2 <- c("Weak component sizes", "Strong component sizes", "Mutual component sizes")
 
-pdf("1_component_sizes2.pdf")
+
+pdf("visuals/1_component_sizes2.pdf")
 lapply(1:length(comp_sizes2), function(x){
   xmax <- max(sapply(comp_sizes2[[x]], function(y) max(as.numeric(names(y)))))
   ymax <- max(sapply(comp_sizes2[[x]], max))
@@ -127,7 +134,7 @@ lapply(1:length(comp_sizes2), function(x){
   lapply(1:length(comp_sizes2[[x]]), function(z){
     lines(comp_sizes2[[x]][[z]], type = "o", col = comp_plot_colors[z], lwd = comp_plot_sizes[z])
   })
-  legend("topright", legend = graph_title, lwd = comp_plot_sizes, col = comp_plot_colors)
+  legend("topright", legend = periods, lwd = comp_plot_sizes, col = comp_plot_colors)
 })
 dev.off()
 
@@ -186,7 +193,7 @@ network_metrics_matrix
 metrics_plot_colors <- c("green", "brown", "orange", "red", "skyblue", "yellow", "slategray", "deeppink", 
                          "purple", "darkgreen", "black", "darkblue")
 metrics_plot_order <- c(5, 4, 3, 12, 11, 10, 9, 6, 7, 8, 1, 2)
-pdf("1_network_metrics.pdf")
+pdf("visuals/1_network_metrics.pdf")
 plot(c(1, 7), c(0.0001, 500), type = "n", xlab = "time period", ylab = "", log = "y", main = "Network metrics")
 for(i in 1:nrow(network_metrics_matrix)){
   lines(network_metrics_matrix[i,], col = metrics_plot_colors[i], lwd = 2)
@@ -199,14 +206,14 @@ dev.off()
 ### Ovo vrlo lepo moze da se vidi i preko grafickog prikaza mreza.
 ### Za identifikaciju grafova, dodacu im atribut "title" kome mogu lako da pristupim preko funkcija iz igraph paketa
 
-graph_title <- c("from 2017-04-21 to 2017-05-04", "from 2017-05-05 to 2017-05-18", "from 2017-05-19 to 2017-05-26", 
-                 "from 2017-05-27 to 2017-06-09", "from 2017-06-10 to 2017-06-23")
-for(i in 1:length(conf_graph_list)) { conf_graph_list[[i]] <- set_graph_attr(conf_graph_list[[i]], 
-                                                                             "title", graph_title[i])}
 
-pdf("1_osnovni.pdf")
+for(i in 1:length(conf_graph_list)) { conf_graph_list[[i]] <- set_graph_attr(conf_graph_list[[i]], 
+                                                                             "title", periods[i])}
+
+pdf("visuals/1_plain.pdf")
 lapply(conf_graph_list, function(x) { plot(x, layout = layout_with_fr(x), frame = TRUE, main = x$title , 
                                            sub = "plain graph", vertex.label = NA, vertex.size = 2, edge.arrow.size = 0.15)})
+
 dev.off()
 
 ### Jasno se vide udeo izolata u vremenskim periodima i razvoj maksimalne komponente - na osnovu podataka o
@@ -217,8 +224,10 @@ dev.off()
 ### (obelezenih sa #WIELead ili @wieilc). Na taj nacin moze da se prati gde se nalaze ucesnici koji su najvise
 ### tvitovali sa ovim kljucnim recima.
 
-nstarttw <- time_narrowed[time_narrowed$screenName %in% unique(selected_tweets$screenName),] %>% 
-  count(screenName)
+startertweets <- readRDS("data/startertweets")
+
+nstarttw <- startertweets %>% distinct(id, .keep_all = TRUE) %>%
+  filter(screenName %in% names(V(conf_graph_list[[3]]))) %>% count(screenName)
 
 ######################################### videti zasto ovo ne radi u funkciji; zar ne dodeljuje direktno grafu?
 lapply(conf_graph_list, function(x) { for (i in 1:length(V(x))) 
@@ -239,7 +248,7 @@ for(i in 1:length(conf_graph_list)){
 yellowred <- rev(rainbow(26, start = 0, end = 1/6)) 
 
 
-pdf("1_kljucne_reci.pdf")
+pdf("visuals/1_num_keywords.pdf")
 lapply(conf_graph_list, function(x) { plot(x, layout = layout_with_fr(x), main = x$title, frame = TRUE,
           sub = "users with number of tweets originally collected (with #WIELead or @wieilc)",
           vertex.label = NA, vertex.size = 2, vertex.color = yellowred[round(rescale(log(V(x)$nstarttw), to = c(0,26)))],
@@ -255,3 +264,4 @@ dev.off()
 ### direktno, dok bi zuti cvorovi blizu centra grafa mogli da budu korinici koji su dosta komunicirali sa drugim 
 ### korisnicima, ali o nekim drugim temama. Nesto od ovoga ce se mozda razjasniti kasnijom analizom.
 
+saveRDS(conf_graph_list, "results/list_of_conf_graphs_after_1st.RData")

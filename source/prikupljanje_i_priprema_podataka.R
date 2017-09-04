@@ -8,7 +8,7 @@ library(dplyr)
 ### startertweets je data frame sa svim tvitovima prikupljenim na ovaj nacin; buduci da su neki tvitovi oznaceni
 ### sa obe ove kljucne reci, potrebno je izbaciti duplikate:
 
-startertweets <- readRDS("startertweets")
+startertweets <- readRDS("data/startertweets")
 
 if(packageVersion("dplyr") >= "0.5.0") {
   uniquesttw <- distinct(startertweets, id, .keep_all = TRUE) 
@@ -106,7 +106,8 @@ dl_tweets <-function(user_list, num_tweets, rts = TRUE, verbose = FALSE) {
 ### Za tako odabrane ucesnike, ukupno 457, izdvojila sam tvitove samo za posmatrani period. 
 
 # all_tweets <- dl_tweets(participants, 3200)
-all_tweets <- rbind(readRDS("all_tweets1"), readRDS("all_tweets2"), readRDS("all_tweets3"), readRDS("all_tweets4"))
+all_tweets <- rbind(readRDS("data/all_tweets1"), readRDS("data/all_tweets2"), 
+                    readRDS("data/all_tweets3"), readRDS("data/all_tweets4"))
 
 my_subset <- function(tweets, from_incl, to_incl){
   tweets <- mutate(tweets, "date" = as.Date(tweets$created))
@@ -147,6 +148,10 @@ selected_tweets$timeframe <-
                          (ifelse(selected_tweets$date >= "2017-05-27" & selected_tweets$date <= "2017-06-09", "time_4", "time_5")))))))
 
 
+### Ovaj skup tvitova ce kasnije biti koriscen za analizu teksta tvitova.
+saveRDS(selected_tweets, "results/tweets.RData")
+
+### Za analizu mreze, podelicu podatke na liste, tako da se svaka lista odnosi na jedan vremenski period. 
 splitted <- split(selected_tweets, selected_tweets$timeframe)
 
 ### Pregledanjem dobijene liste i pripremanjem za pravljenje matrice, primetila sam da je broj ucesnika razlicit
@@ -196,3 +201,4 @@ conf_vnum <- sapply(conf_graph_list, function(x) length(V(x)))
 conf_iso_num <- sapply(conf_graph_list, function(x) length(V(x)[degree(x) == 0]))
 # time_1 -> time_5 : 223    246     12    254    257
 
+saveRDS(conf_graph_list, "results/list_of_conf_graphs.RData")
