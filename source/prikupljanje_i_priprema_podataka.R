@@ -149,7 +149,7 @@ selected_tweets$timeframe <-
 
 
 ### Ovaj skup tvitova ce kasnije biti koriscen za analizu teksta tvitova.
-saveRDS(selected_tweets, "results/tweets.RData")
+saveRDS(selected_tweets, "results/selected_tweets.RData")
 
 ### Za analizu mreze, podelicu podatke na liste, tako da se svaka lista odnosi na jedan vremenski period. 
 splitted <- split(selected_tweets, selected_tweets$timeframe)

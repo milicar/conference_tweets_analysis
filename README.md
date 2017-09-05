@@ -19,15 +19,15 @@ Analizom mreže koju čine učesnici skupa, rad će pokušati da odgovori na sle
 Analizom teksta tvitova, rad će pokušati da otkrije sledeće:
 
 * Koji je opšti utisak o skupu?
-* Koliko su informacije nove za učesnike? **
-* Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
 * Koliko je skup interesantan za učesnike?
+* Koliko su informacije nove za učesnike?
+* Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
 * Koje su teme posebno interesantne za učesnike?
 
 Kombinovanjem ovih metoda, rad će pokušati da utvrdi:
 
-* Ko su centralni učesnici i kako utiču na teme komunikacije?
-* Da li "angažovaniji učesnici" imaju veću "informacionu dobit"? **  
+* Ko su centralni učesnici i kako su povezani sa temama komunikacije?
+* Da li "angažovaniji učesnici" imaju veću "informacionu dobit"? 
 
 
 
@@ -46,35 +46,35 @@ Za kreiranje mreže i mrežne analize su korišćene funkcije iz paketa igraph (
 
 ### Analiza
 
-Na pitanje o novoostvarenim kontaktima odgovoreno je pomoću sledećih metrika:
+Na pitanje o novoostvarenim kontaktima odgovoreno je pomoću sledećih metrika:  
 * gustina mreže, merena ne uzimajući u obzir težine veza, tako da ne odražava intenzitet komunikacije, nego broj kontakata
 * broj komponenti i veličina najveće komponente, gde slabe komponente predstavljaju povezanost učesnika na bilo koji način, jake komponente uzimaju u obzir smer veza, a određene su i komponente za neusmeren graf, pri čemu je konverzija vršena tako da veza između učesnika predstavlja dvosmernu komunikaciju u usmerenom grafu
-* prosečna putanja i prečnik mreže, koji takođe govore o povezanosti mreže
+* prosečna putanja i prečnik mreže, koji takođe govore o povezanosti mreže  
 
-Za merenje homogenosti mreže u odnosu na komunikaciju korišćene su sledeće metrike:
+Za merenje homogenosti mreže u odnosu na komunikaciju korišćene su sledeće metrike:  
 * distribucija stepena i varijantnost stepena, odnosno razlika u broju kontakata između pojedinačnih učesnika
 * koeficijent klasterovanja, odnosno tranzitivnost mreže, koja govori o lokalnoj povezanosti učesnika
 * broj i veličina najvećih i maksimalnih klika i veličina jezgara, takođe u vezi sa lokalnom povezanošću učesnika
 * centralizovanost mreže, koja, zajedno sa prethodnim metrikama, ukazuje na strukturu mreže
 * određivanje klastera, koji govore o podeljenosti mreže
-* analiza mreže bez glavnog organizatora (čvor sa najvećim stepenom)
+* analiza mreže bez glavnog organizatora (čvor sa najvećim stepenom)  
 
 Na pitanje o komunikaciji posle skupa odgovoreno je tumačenjem rezultata iz prethodnih analiza.  
 * Koji je opšti utisak o skupu?
-* Koliko su informacije nove za učesnike? **
-* Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
 * Koliko je skup interesantan za učesnike ili koliko ih angažuje?
-* Koje su teme posebno interesantne za učesnike?
+* Koliko su informacije nove za učesnike?
+* Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
+* Koje su teme posebno interesantne za učesnike?  
 
 U analizi teksta odrediće se opšti utisak o skupu putem analize sentimenta tvitova.  
-Koliko su teme skupa nove za učesnike meriće se preko zastupljenosti tema skupa u tvitovima učesnika pre i tokom skupa.  **  
+Interesantnost skupa će se meriti preko učestanosti komuniciranja o skupu, odnosno zastupljenosti tvitova o skupu u odnosu na ukupan broj tvitova u istom periodu.  
+Koliko su teme skupa nove za učesnike meriće se preko zastupljenosti tema skupa u tvitovima učesnika pre i tokom skupa. Ovo možda neće biti u potpunosti moguće, budući da korisnici Tvitera pre skupa često tvituju o temama koje će biti zastupljene na skupu, bez obzira na to da li im je tema poznata ili ne, ili retvituju najave predavanja, pa se neke ključne reči vezane za nove informacije koje će tek dobiti na skupu, mogu naći i u tvitovima pre skupa. Osim toga, velika je verovatnoća da su učesnici skupa već dobro upoznati sa širom temom skupa, a neke nove informacije bi predstavljale tek nijanse koje je teže uočiti.  
 Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa meriće se putem zastupljenosti tema skupa u tvitovima učesnika tokom i posle skupa.  
-Interesantnost skupa će se meriti preko učestanosti komuniciranja o skupu, odnosno zastupljenosti tvitova sa hashtagom skupa u odnosu na ukupan broj tvitova u istom periodu.  
 Teme posebno interesantne za učesnike identifikovaće se preko ključnih reči i preko hashtagova koji se pojavljuju zajedno sa konferencijskim hashtagom - sa najvećom učestanosti i kod najvećeg broja učesnika.  
 
 
-U objedinjenoj analizi odrediće se centralni učesnici prema četiri mere centralnosti, a kasnije će se videti njihova uloga u temama komunikacije.  
-Na kraju, analiziraće se korelacija između centralnosti učesnika i rezultata o "informacionoj dobiti". **
+U objedinjenoj analizi odrediće se centralni učesnici prema četiri mere centralnosti, a kasnije će se videti njihova povezanost sa temama komunikacije.  
+Na kraju, analiziraće se korelacija između centralnosti učesnika i rezultata o "informacionoj dobiti". Informaciona dobit bi predstavljala bilo koju informaciju (ključnu reč) koja bi bila nova za učesnika skupa, a koja bi se detektovala i u periodu posle skupa kao nešto što je ostavilo dovoljno jak utisak da učesnik skupa tvituje o tome i nakon skupa.  
 
 
 Teme skupa će biti identifikovane u programu skupa, a zastupljenost tema u tvitovima će se meriti poklapanjem reči iz tvitova sa ključnim rečima određenih tema.  
