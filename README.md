@@ -19,7 +19,7 @@ Analizom mreže koju čine učesnici skupa, rad će pokušati da odgovori na sle
 Analizom teksta tvitova, rad će pokušati da otkrije sledeće:
 
 * Koji je opšti utisak o skupu?
-* Koliko je skup interesantan za učesnike?
+* Koliko je skup interesantan za učesnike ili koliko ih angažuje?
 * Koliko su informacije nove za učesnike?
 * Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
 * Koje su teme posebno interesantne za učesnike?
@@ -60,11 +60,7 @@ Za merenje homogenosti mreže u odnosu na komunikaciju korišćene su sledeće m
 * analiza mreže bez glavnog organizatora (čvor sa najvećim stepenom)  
 
 Na pitanje o komunikaciji posle skupa odgovoreno je tumačenjem rezultata iz prethodnih analiza.  
-* Koji je opšti utisak o skupu?
-* Koliko je skup interesantan za učesnike ili koliko ih angažuje?
-* Koliko su informacije nove za učesnike?
-* Koliko teme skupa ostaju predmet interesovanja učesnika posle skupa?
-* Koje su teme posebno interesantne za učesnike?  
+
 
 U analizi teksta odrediće se opšti utisak o skupu putem analize sentimenta tvitova.  
 Interesantnost skupa će se meriti preko učestanosti komuniciranja o skupu, odnosno zastupljenosti tvitova o skupu u odnosu na ukupan broj tvitova u istom periodu.  

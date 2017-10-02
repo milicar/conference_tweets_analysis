@@ -189,7 +189,7 @@ filter(keywords, word %in% str_to_lower(lexicon::freq_last_names$Surname)) %>% d
 
 ### Izbacivanje glagola:
 
-final_keywords <- keywords %>% distinct(track, word) %>% 
+conf_keywords <- keywords %>% distinct(track, word) %>% 
   left_join(lexicon::hash_grady_pos) %>% filter(!str_detect(pos, "Verb") | is.na(pos)) %>% 
   distinct(track, word)                                                       
 
@@ -201,9 +201,47 @@ final_keywords <- keywords %>% distinct(track, word) %>%
 ### Teme imaju dosta zajednickih kljucnih reci, sto i odgovara cinjenici da se teme preklapaju, pogotovo kada su 
 ### ovako bliske.
 
-final_keywords %>% group_by(word) %>% mutate(n = n()) %>% pairwise_cor(track, word, n) %>% arrange(desc(correlation))
+conf_keywords %>% group_by(word) %>% mutate(n = n()) %>% pairwise_cor(track, word, n) %>% arrange(desc(correlation))
 
 
-saveRDS(final_keywords, "results/final_keywords_df.RData")
+saveRDS(conf_keywords, "results/conf_keywords_df.RData")
 saveRDS(prog_headings, "results/program_headings_df.RData")
+
+
+### Na kraju, izdvojicu i bigrame iz naslova, buduci da su pojedinacne reci dosta siroke. Na primer, neke
+### kljucne reci su "women", "scale", "steps", "mindset"; ako se sve teme zajedno posmatraju kao vreca reci, 
+### moguce je zamisliti tvit koji govori o mrsavljenju, a za koji bi se na osnovu ovih kljucnih reci moglo
+### reci da govori o temema skupa. Zbog toga cu pokusati da malo preciznije odredim "kljucne reci" preko 
+### bigrama.
+
+### Naslove cu podeliti na bigrame, a onda cu zadrzati samo one u kojima nema stop reci, imena, brojeva i
+### reci kracih od tri slova, sto bi trebalo da da kvalitetne sintagme.
+### collapse = FALSE sprecava spajanje svih naslova u jedan pre tokenizacije, odnosno ne dozvoljava da
+### bigram bude sastavljen od poslednje reci iz jednog naslova i prve reci iz sledeceg.
+
+
+conf_bigrams <- prog_headings %>% unnest_tokens(bigram, text, token = "ngrams", n = 2, collapse = FALSE) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>%  
+  filter_at(vars(word1,word2),          # filtriranje obe kolone/reci: izb. stop reci, imena, brojeva i kracih od 2
+            all_vars((!. %in% c(stop_words$word, lexicon::common_names)) & 
+                       (!str_detect(., pattern = "^.{1,2}$|\\d")))) 
+
+
+### Za izbacivanje glagola sam napravila listu reci (iz recnika lexicon::hash_grady_pos) koje mogu da imaju 
+### samo znacenje glagola
+
+verbs_only <- lexicon::hash_grady_pos %>% group_by(word) %>% filter(all(str_detect(pos, "^Verb"))) 
+  
+conf_bigrams %>%
+  filter_at(vars(word1, word2), any_vars(. %in% (verbs_only$word )))
+  
+### Cini mi se da bi se izbacivanjem glagola izbacilo nekoliko vrlo dobrih fraza; u nekima je glagol u obliku
+### glagolske imenice, kao "cognitive computing", ali cak i tamo gde je u funkciji predikata, kao "creating
+### influence", "defining leadership" ili "embracing risk", fraze vrlo lepo predstavljaju teme. Jedino sto bih 
+### izbacila iz ovih kljucnih bigrama su oni koji se odnose na otkazana predavanja.
+
+conf_bigrams <- conf_bigrams %>% filter_at(vars(word1, word2), all_vars(!. %in% ("cancelled")))
+
+
+saveRDS(conf_bigrams, "results/conf_bigrams_df.RData")
 

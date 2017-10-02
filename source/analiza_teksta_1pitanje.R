@@ -284,7 +284,7 @@ time_sent <- lapply(1:length(timefr), function(x){
 ### recima javlja samo u mnozini, a u tvitovima samo u jednini. Zatim sam za svaku rec sumirala broj pojavljivanja 
 ### i ukupan sentiment (u tabeli conf_word_sentiment su ovi podaci dati po periodima). 
 
-program_keywords <- readRDS("results/final_keywords_df.RData") %>% distinct(word)
+program_keywords <- readRDS("results/conf_keywords_df.RData") %>% distinct(word)
 
 keywords_sentiment <- conf_words_sentiment %>% mutate(word_stem = tm::stemDocument(word)) %>% 
   inner_join(program_keywords %>% mutate(word = tm::stemDocument(word)) %>% distinct(word), by = c("word_stem" = "word")) %>%
@@ -320,6 +320,8 @@ top_words <- keywords_sentiment %>% group_by(total_sentiment < 0) %>%
 
 ### Recnik i reci koje treba izmeniti se spajaju preko osnove, tako ce se izmeniti i "bias" i "biased", ali nece 
 ### "wellinformed", iako "well" hoce.
+### lexicon::hash_sentiment_jockers je podrazumevani recnik koji paket sentimentr koristi, a proverom nekoliko
+### reci u razlicitim recnicima koje ovaj paket koristi, ucinilo mi se da i jeste najbolja opcija. 
 
 words_to_update <- lexicon::hash_sentiment_jockers %>%    
   mutate(stemmed = tm::stemDocument(lexicon::hash_sentiment_jockers$x)) %>%
@@ -327,6 +329,8 @@ words_to_update <- lexicon::hash_sentiment_jockers %>%
                distinct(word), by = c("stemmed" = "word")) %>% select(x) %>% mutate(y = 0)
 
 
+### Funkcija update_polarity_table dodaje i izbacuje reci iz recnika (dve odvojene operacije, ne moze da izmeni 
+### vrednost sentimenta za rec koja se vec nalazi u recniku)
 updated_polarity_table <- update_polarity_table(lexicon::hash_sentiment_jockers, 
                                                 drop = words_to_update$x,  # moraju prvo da se izbace postojece vrednosti
                                                 x = data.frame(x = words_to_update$x, y = words_to_update$y))
