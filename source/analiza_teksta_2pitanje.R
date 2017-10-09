@@ -128,3 +128,5 @@ tweets %>% filter((date == "2017-05-22" | date == "2017-05-23") & screenName == 
 ### losa klasifikacija tvitova o skupu i nedostatak selekcije ucesnika. Oba problema imaju prostora za bolja 
 ### resenja i mogu da ostanu otvorena za kasnija poboljsavanja.
 
+
+saveRDS(tweets_by_participant, "results/conf_tweets_ratio_by_participant.RData")
