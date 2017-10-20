@@ -13,7 +13,7 @@ library(ggplot2)
 ### Na ova dva pitanja sam mislila da pokusam da odgovorim merenjem zastupljenosti tema skupa u tvitovima 
 ### ucesnika. Koliko su informacije nove za ucesnike merila bih preko zastupljenosti tema u tvitovima pre 
 ### skupa u poredenju sa zastupljenoscu tokom skupa. Koliko se ucesnici bave tim temama posle skupa
-### merila zastupljenoscu u periodima posle skupa, u poredenju sa periodom skupa. Analize i podaci bi
+### merila bih zastupljenoscu u periodima posle skupa, u poredenju sa periodom skupa. Analize i podaci bi
 ### bili uglavnom isti, jedino bi se razlikovao period posmatranja.
 
 ### Moguci su razliciti problemi u vezi sa ovom analizom. 
@@ -44,8 +44,11 @@ library(ggplot2)
 ### pomoc baza znanja, ali to cu da ostavim kao mogucnost za kasnija poboljsanja.
 
 tweets <- readRDS("results/tweets.RData")
-conf_bigrams <- readRDS("results/conf_bigrams_df.RData")
+conf_bigrams <- readRDS("results/conf_bigrams_df.RData") # bigrami (teme) izdvojeni iz programa skupa
 
+
+### Tvitovi su podeljeni na bigrame, a zatim su ti bigrami pretrazeni za poklapanje sa bigramima koji 
+### predstavljaju teme skupa.
 
 tweets_bigrams <- tweets %>% unnest_tokens(bigram, text, token = "ngrams", n = 2, collapse = FALSE) %>%
   separate(bigram, c("word1", "word2"), sep = " ")
@@ -54,16 +57,16 @@ conf_matched_bigrams <- inner_join(tweets_bigrams, conf_bigrams) %>% unite(bigra
 
 ### Ako se uparuju bigrami, odnosno identicna konstrukcija, takvih poklapanja je relativno malo (666).
 
-### Koriscenje razlicitih bigrama po periodima:
+### Koriscenje razlicitih bigrama (tema) po periodima:
 conf_matched_bigrams %>% distinct(timeframe, bigram) %>% count(timeframe)
 # time_1 : time_5 =>  21 29 72 24 27
-### U periodu skupa je korisceno najvise razlicitih bigrama.
+### U periodu skupa je korisceno najvise razlicitih tema.
 
 ### Broj razlicitih kombinacija ucesnik-bigram, po periodima:
 conf_matched_bigrams %>% distinct(timeframe, screenName, bigram) %>% count(timeframe) 
 # time_1 : time_5 =>  60  75 279  50  54
 
-### Broj razlicitih ucesnika koji su koristili bigrame, po periodima:
+### Broj razlicitih ucesnika koji su koristili bigrame (teme), po periodima:
 conf_matched_bigrams %>% distinct(timeframe, screenName) %>% count(timeframe)
 # time_1 : time_5 =>  53  55 139  44  39
 
@@ -71,51 +74,52 @@ conf_matched_bigrams %>% distinct(timeframe, screenName) %>% count(timeframe)
 length(unique(conf_matched_bigrams$screenName))
 # 211
 
-### Takode, i po broju ucesnika koji su koristili razlicite bigrame, period skupa se izdvaja od ostalih.
-### Ipak, relativno mali broj ucesnika koji je koristio ovakve bigrame (211 od ukupno 457 posmatranih,
-### manje od 50%) govori o tome da je kriterijum suvise strog.
+### Takode, i po broju ucesnika koji su koristili razlicite bigrame (teme), period skupa se izdvaja od 
+### ostalih. Ipak, relativno mali broj ucesnika koji je koristio ovakve bigrame (211 od ukupno 457 
+### posmatranih, manje od 50%) govori o tome da je kriterijum suvise strog.
 
 ### Sta se desava ako pogledamo ucesnike kroz vreme, da li su isti ucesnici, oni koji su koristili neki 
-### bigram za vreme skupa, nastavili da ga koriste i posle skupa, ili se radi o razlicitim ucesnicima koji 
-### "nasumicno" koriste razlicite bigrame?
+### bigram (temu) za vreme skupa, nastavili da ga koriste i posle skupa, ili se radi o razlicitim 
+### ucesnicima koji "nasumicno" koriste razlicite bigrame?
 
-### Broj koriscenja razlicitih bigrama prema korisniku i vremenu:
+### Broj koriscenja razlicitih bigrama (tema) prema korisniku i vremenu:
 participant_bigram_by_timeframe <- conf_matched_bigrams %>% 
   group_by(screenName, timeframe, bigram) %>% count() %>% 
   group_by(screenName, bigram) %>% spread(timeframe, n)
 
 ### Ako bi se tabela posmatrala kao matrica bigram-vremenski period, moglo bi da se kaze da je retka.
-### Izgleda da je najveci broj koriscenja bigrama bio u periodu skupa, pa cu da ispitam koliko bigrama
-### je korisceno samo u ovom periodu i koliko ih je upotrebljeno samo jednom. Ovo je, osim za uvid u 
-### koriscenje, vazno i zato sto se "ucenje" i "zaboravljanje" mere upravo prema periodu skupa, pa su 
-### bigrami koji su upotrebljeni samo tada ujedno i "nauceni" i "zaboravljeni", odnosno novi su (prvi 
-### put se javljaju u periodu skupa) i nisu ostali u upotrebi posle skupa.
+### Izgleda da je najveci broj koriscenja bigrama (tema) bio u periodu skupa, pa cu da ispitam koliko 
+### bigrama je korisceno samo u ovom periodu i koliko ih je upotrebljeno samo jednom. Ovo je, osim za 
+### uvid u koriscenje, vazno i zato sto se "ucenje" i "zaboravljanje" mere upravo prema periodu skupa, 
+### pa su bigrami koji su upotrebljeni samo tada ujedno i "nauceni" i "zaboravljeni", odnosno novi su 
+### (prvi put se javljaju u periodu skupa) i nisu ostali u upotrebi posle skupa.
 
 
 time3_uses <- participant_bigram_by_timeframe %>% 
   filter_at(vars(time_1, time_2, time_4, time_5), all_vars(is.na(.)))
-### U 253 slucaja je jedan ucesnik koristio odredeni bigram samo u periodu skupa; to je vise od pola
-### ucesnik-bigram kombinacija (462), drugim recima, vise od pola upotreba razlicitih bigrama od strane 
-### razlicitih ucesnika se odnosi na upotrebu bigrama samo u periodu skupa. Ovde vrednost kolone time_3 
-### predstavlja broj koriscenja bigrama u tom periodu.
+### U 253 slucaja je jedan ucesnik koristio odredeni bigram (temu) samo u periodu skupa; to je vise od 
+### pola ucesnik-bigram kombinacija (462), drugim recima, vise od pola upotreba razlicitih bigrama od 
+### strane razlicitih ucesnika se odnosi na upotrebu bigrama samo u periodu skupa. Ovde vrednost kolone 
+### time_3 predstavlja broj koriscenja bigrama u tom periodu.
 
 time3_uses %>% filter(time_3 == 1)
-### U 228 slucajeva je jedan ucesnik samo jednom upotrebio odredeni bigram i to u periodu skupa; to je
-### 90% slucajeva iz prethodnog primera; (ne znaci da nije upotrebljavao druge bigrame drugacijom dinamikom)
+### U 228 slucajeva je jedan ucesnik samo jednom upotrebio odredeni bigram (temu) i to u periodu skupa; 
+### to je 90% slucajeva iz prethodnog primera; (ne znaci da nije upotrebljavao druge bigrame drugacijom 
+### dinamikom)
 
 time3_uses %>% group_by(screenName) %>% count(sort = TRUE)
-### Broj bigrama koje je odredeni ucesnik upotrebljavao samo u periodu skupa; ne znaci da neke druge bigrame
-### nije koristio i u drugim periodima
+### Broj bigrama koje je odredeni ucesnik upotrebljavao samo u periodu skupa; ne znaci da neke druge 
+### bigrame (teme) nije koristio i u drugim periodima
 
-### Koliko je razlicitih bigrama svaki korisnik upotrebio u svakom vremenskom periodu? (bez obzira
-### na to koliko puta)
+### Koliko je razlicitih bigrama (tema) svaki korisnik upotrebio u svakom vremenskom periodu? (bez
+### obzira na to koliko puta)
 
 participant_bigram_occurence <- participant_bigram_by_timeframe %>% 
   mutate_all(funs(ifelse(is.na(.), 0, 1))) %>%  # mutate_all i summarise_all primenjuju funs na sve kolone
   group_by(screenName) %>% select(-bigram) %>%  #        po kojima se ne grupise
   summarise_all(sum)
 
-### Koliko ucesnika je koristilo samo jedan bigram?
+### Koliko ucesnika je koristilo samo jedan bigram (temu)?
 participant_bigram_occurence %>% gather(key = timeframe, value = bigrams_count, -screenName ) %>%
   group_by(screenName) %>% summarise(bigrams_count = sum(bigrams_count)) %>% arrange(desc(bigrams_count)) %>%
   filter(bigrams_count == 1) %>% nrow()
@@ -145,10 +149,11 @@ participant_bigram_occurence %>% gather(key = timeframe, value = bigrams_count, 
 ### gde se ove reci nalaze u obrnutom redosledu, tako da pomocu "skip_ngrams" opcije ne bi uopste bilo
 ### moguce upariti ovaj bigram. Osim toga, u ovom slucaju je neophodno i pretrazivanje po osnovama reci.
 
-### Za pretrazivanje po pojedinacnim recima, prvo cu da podelim i tvitove i bigrame na reci.
+### Za pretrazivanje po pojedinacnim recima, prvo cu da podelim i tvitove i bigrame (teme) na reci.
 
-### bigrami su podeljeni na dve reci, potrebno ih je staviti u jednu kolonu po kojoj ce se vrsiti spajanje
-### sa recima tvitova; bigid ce biti id bigrama, a which ce sadrzati naziv originalne kolone reci (word1/word2)
+### bigrami (teme) su podeljeni na dve reci, ali je svaka u posebnoj koloni; potrebno ih je staviti u 
+### jednu kolonu po kojoj ce se vrsiti spajanje sa recima tvitova; bigid ce biti id bigrama, a which
+### ce sadrzati naziv originalne kolone reci (word1/word2)
 gathered_conf_bigrams <- conf_bigrams %>% select(-track) %>% distinct() %>% #neki bigr. su isti za vise trekova
   mutate(bigid = 1:nrow(.)) %>%                                              #id bigrama 
   gather(which, word, word1, word2) %>%                                      #kombinuje word1 i word2 u 1 kolonu
@@ -179,13 +184,13 @@ united_conf_bigrams <- gathered_conf_bigrams %>% group_by(bigid) %>% spread(whic
 
 
 matched_by_bigram <- matched_by_word %>% group_by(id, bigid) %>%
-  summarise(text = str_c(word, rev(word), sep = " ", collapse = " "), 
+  summarise(text = str_c(word, rev(word), sep = " ", collapse = " "), # spajanje svih reci u tekst, u oba smera
             timeframe = first(timeframe), screenName = first(screenName)) %>%  # da se ne izgube kolone sumarizacijom
-  unnest_tokens(bigram, text, token = "ngrams", n = 2, collapse = FALSE) %>%
-  inner_join(united_conf_bigrams) %>% ungroup()
+  unnest_tokens(bigram, text, token = "ngrams", n = 2, collapse = FALSE) %>% # izdvajanje bigrama
+  inner_join(united_conf_bigrams) %>% ungroup()                                # spajanje sa temama
 
 
-### broj razlicitih bigrama po periodu je mnogo veci:
+### broj razlicitih bigrama (prepoznatih tema) po periodu je mnogo veci:
 matched_by_bigram %>% distinct(timeframe, bigram) %>% count(timeframe) %>% .$n
 # 58  77 104  66  67 naspram  21 29 72 24 27 ili za skip_ngrams (+stem / -stem):37 46 87 40 46 / 29 36 79 29 32
 
@@ -195,55 +200,56 @@ matched_by_bigram %>% distinct(timeframe, screenName, bigram) %>% count(timefram
 # 260 353 559 240 320  naspram  60 75 279 50 54; skip_ngrams:  96 150 336 128 166 / 73  91 317  63  68
 
 
-### broj razlicitih ucesnika koji su koristili bigrame
+### broj razlicitih ucesnika koji su koristili bigrame / teme
 matched_by_bigram %>% distinct(timeframe, screenName) %>% count(timeframe) %>% .$n
 # 152 179 212 138 170 naspram 53  55 139  44  39; skip_ngrams: 74 102 165  93 125 / 61  62 151  56  50 
 
-length(unique(matched_by_bigram$screenName)) # 369, od ukupno 457, tj. 80.7%
+length(unique(matched_by_bigram$screenName)) # 369, od ukupno 457, tj. 80.7% - u svim periodima zajedno
 
-### Prepoznavanje tema je ovako mnogo bolje, za 80% ucesnika je pronadena upotreba tema skupa, sto vise
-### odgovara pretpostavci da su ucesnici bar jednom upotrebili neku od kljucnih fraza koje se nalaze
-### i u naslovima predavanja, iako bi detaljniji sadrzaj predavanja sigurno dao mnogo vise poklapanja
-### i preciznije rezultate.
+### Prepoznavanje tema je ovako mnogo bolje, za 80% ucesnika je pronadena upotreba tema skupa (u ukupnom
+### posmatranom periodu), sto vise odgovara pretpostavci da su ucesnici bar jednom upotrebili neku
+### od kljucnih fraza koje se nalaze i u naslovima predavanja, iako bi detaljniji sadrzaj predavanja
+### sigurno dao mnogo vise poklapanja i preciznije rezultate.
 
 
 ### Pregled upotrebe po periodima za kombinacije ucesnik-bigram, odnosno koliko puta je odredeni
-### ucesnik upotrebio odredeni bigram u svakom periodu:
+### ucesnik upotrebio odredeni bigram (temu) u svakom periodu:
 better_participant_bigram_by_timeframe <- matched_by_bigram %>% 
   group_by(screenName, timeframe, bigram) %>% count() %>% 
   group_by(screenName, bigram) %>% spread(timeframe, n)
 
 
-### Ponovo cu da ispitam koliko je bigrama korisceno samo u trecem periodu. Da podsetim, ovo je zanimljivo
-### zato sto se prema tom periodu meri "ucenje" i "zaboravljanje", pa su bigrami koji su korisceni samo 
-### tada ujedno i "nauceni" i "zaboravljeni" posle skupa.
+### Ponovo cu da ispitam koliko je bigrama (tema) korisceno samo u trecem periodu. Da podsetim, ovo je 
+### zanimljivo zato sto se prema tom periodu meri "ucenje" i "zaboravljanje", pa su bigrami koji su 
+### korisceni samo tada ujedno i "nauceni" i "zaboravljeni" posle skupa.
 
 better_time3_uses <- better_participant_bigram_by_timeframe  %>% 
   filter_at(vars(time_1, time_2, time_4, time_5), all_vars(is.na(.))) 
 ### 448 od 1439, odnosno 31% ucesnik-bigram kombinacija je samo u vreme skupa
 
-### Upotreba samo jednog bigrama, samo u toku skupa:
+### Upotreba samo jednog bigrama/teme, samo u toku skupa:
 better_time3_uses %>% filter(time_3 == 1)
-### 394, odnosno u 88% slucajeva upotrebe bigrama samo u vreme skupa, radi se o upotrebi samo jednog bigrama
+### 394, odnosno u 88% slucajeva upotrebe bigrama samo u vreme skupa, radi se o upotrebi samo jednog 
+### bigrama (teme)
 
 
-### Koliko je razlicitih bigrama svaki korisnik upotrebio u svakom vremenskom periodu (bez obzira na to
-### koliko puta)?
+### Koliko je razlicitih bigrama (tema) svaki korisnik upotrebio u svakom vremenskom periodu (bez 
+### obzira na to koliko puta)?
 
 better_part_bigr_occurence <- better_participant_bigram_by_timeframe %>% 
   mutate_all(funs(ifelse(is.na(.), 0, 1))) %>%  
   group_by(screenName) %>% select(-bigram) %>%  
   summarise_all(sum)
 
-### Koliko ucesnika je koristilo samo jedan bigram?
+### Koliko ucesnika je koristilo samo jedan bigram (temu)?
 better_part_bigr_occurence %>% gather(key = timeframe, value = bigrams_count, -screenName ) %>%
   group_by(screenName) %>% summarise(bigrams_count = sum(bigrams_count)) %>% 
   arrange(desc(bigrams_count)) %>%
   filter(bigrams_count == 1) %>% nrow()   #90
 
-### 90 ucesnika od 369 koliko ih je koristilo ovakve bigrame je upotrebilo samo jedan bigram ukupno, 
-### sto moze da govori o njihovoj slaboj ukljucenosti u komunikaciju o skupu, a posebno u vezi sa ovim
-### pitanjem, govori o malom dijapazonu tema za dobar deo ucesnika.
+### 90 ucesnika od 369 koliko ih je koristilo ovakve bigrame (teme) je upotrebilo samo jedan bigram 
+### ukupno, sto moze da govori o njihovoj slaboj ukljucenosti u komunikaciju o skupu, a posebno u vezi 
+### sa ovim pitanjem, govori o malom dijapazonu tema za dobar deo ucesnika.
 
 
 ### Ako se posmatraju teme skupa zajedno, odnosno koliko su sve teme skupa zastupljene u tvitovima nekog
@@ -252,16 +258,16 @@ better_part_bigr_occurence %>% gather(key = timeframe, value = bigrams_count, -s
 ### "naucio", odnosno prvi put upotrebio u vreme skupa ili koju je koristio i nakon skupa, onda bi se
 ### posmatrale sve kombinacije ucesnik-bigram posebno.
 
-### Vec izracunata tabela pojavljivanja n-grama daje podatke o broju razlicitih n-grama, odnosno tema
+### Vec izracunata tabela pojavljivanja bigrama daje podatke o broju razlicitih bigrama, odnosno tema
 ### skupa koje je neki ucesnik koristio. 
 
 better_part_bigr_occurence %>% arrange(desc(time_3))
 
 ### Radi lakseg racunanja, kombinovacu kolone time_1 i time_2 u jednu, uzimajuci celi deo srednje vrednosti;
-### isto i za kolone time_4 i time_5. Rezutate "ucenja" cu da dobijem razlikom broja n-grama upotrebljenih 
-### u periodu trajanja skupa i pre skupa. Pozitivne vrednosti ce predstavljati broj "naucenih" n-grama,
+### isto i za kolone time_4 i time_5. Rezutate "ucenja" cu da dobijem razlikom broja bigrama upotrebljenih 
+### u periodu trajanja skupa i pre skupa. Pozitivne vrednosti ce predstavljati broj "naucenih" bigrama,
 ### negativne broj "zaboravljenih", dok ce 0 predstavljati nepromenjenu upotrebu, bilo da se radi o jednakom
-### broju koriscenih n-grama, bilo da se radi o nuli u oba perioda. Kod "zadrzanog znanja", zeljeni 
+### broju koriscenih bigrama, bilo da se radi o nuli u oba perioda. Kod "zadrzanog znanja", zeljeni 
 ### rezultat je jednako koriscenje u periodu skupa kao i posle njega, pa je tu vazno razlikovati jednaku
 ### upotrebu i jednaku neupotrebu, tj. 0-0 i 1-1. Zbog toga cu "zadrzano znanje" da merim kolicnikom,
 ### gde ce jednaka neupotreba (0/0) da da NaN, jednaka upotreba 1, "naknadno ucenje" interval (1, Inf)
@@ -275,7 +281,7 @@ learning_different_ngrams <- better_part_bigr_occurence %>% group_by(screenName)
   transmute(learned = time_conf - before, retained = after / time_conf) %>% ungroup()
 
 
-### Koliko puta je neki ucesni koristio odredeni bigram?
+### Koliko puta je neki ucesni koristio odredeni bigram (temu)?
 
 better_participant_bigram_by_timeframe %>% arrange(desc(time_3))
 
@@ -288,19 +294,19 @@ learning_specific_ngrams <- better_participant_bigram_by_timeframe %>%
             after = trunc(mean(c(time_4, time_5)))) %>%
   transmute(learned = time_conf - before, retained = after / time_conf) %>% ungroup()
 
-### U ovom slucaju, svaki red se odnosi na upotrebu odredenog bigrama; pozitivne vrednosti u koloni 
-### "learned" znace da je bigram vise koriscen u toku skupa nego pre (i ovde bi mozda trebalo ubaciti 
+### U ovom slucaju, svaki red se odnosi na upotrebu odredenog bigrama (teme); pozitivne vrednosti u koloni 
+### "learned" znace da je tema vise koriscena u toku skupa nego pre (i ovde bi mozda trebalo ubaciti 
 ### distinkciju izmedu 6-3 i 3-0, da se razlikuje "naucen" od "vise koriscen" ??), negativne da je 
-### koriscen manje, nula da je jednako koriscen/nekoriscen. Za kolonu "retained" vazi isto kao i u 
+### koriscena manje, nula da je jednako koriscena/nekoriscena. Za kolonu "retained" vazi isto kao i u 
 ### prethodnoj tabeli.
 
 
 ### Koliko su informacije nove za ucesnike?
 
 
-### Prema broju bigrama (po ucesniku) koriscenih samo u periodu skupa (448 od ukupno 1439 razlicitih
+### Prema broju tema (po ucesniku) koriscenih samo u periodu skupa (448 od ukupno 1439 razlicitih
 ### korisnik-bigram kombinacija), moglo bi se zakljuciti da je barem 31% koriscenja razlicitih bigrama 
-### rezultat "ucenja" (a isti je procenat i "zaboravljanja"). Oko 88% od toga je koriscenje n-grama 
+### rezultat "ucenja" (a isti je procenat i "zaboravljanja"). Oko 88% od toga je koriscenje tema 
 ### samo jednom.
 
 better_time3_uses %>% nrow(.)
@@ -313,38 +319,43 @@ table(learning_different_ngrams$learned)
 pdf("visuals/text3_bigrams_learned_index.pdf")
 ggplot(learning_different_ngrams, aes(learned)) +
   geom_histogram(binwidth = 1, colour =  "black", fill = "red", alpha = 0.3)+
-  labs(title = "\"learned\" index distribution:\nnumber of new bigrams used during conference", 
+  labs(title = "\"learned\" index distribution:\nnumber of new topic bigrams used during conference", 
        x ="\"learned\" index", y = "participant count") +
   scale_x_continuous(breaks = c(-5:10, 20, 30)) +
   theme(plot.title = element_text(face = "bold", hjust = 0.5)) 
 dev.off()
 
-### Ako se pogleda raspodela pokazatelja "naucenih" bigrama po ucesnicima, 36% (135) ucesnika nije 
-### "naucilo" nijedan bigram, a 38% (143) je u vreme skupa upotrebilo jedan bigram vise ili manje u 
+### Ako se pogleda raspodela pokazatelja "naucenih" bigrama (tema) po ucesnicima, 36% (135) ucesnika 
+### nije "naucilo" nijednu temu, a 38% (143) je u vreme skupa upotrebilo jedan bigram vise ili manje u 
 ### odnosu na period pre skupa. Moze se reci da po ovom pitanju nema neke znacajne promene u koriscenju 
-### bigrama za vreme skupa u odnosu na period pre skupa (mereno preko kljucnih reci iz naslova predavanja).
+### bigrama za vreme skupa u odnosu na period pre skupa (mereno na ovaj nacin, preko naslova predavanja).
 ### Ako bi se uzeli u obzir svi ucesnici, ukljucujuci i one za koje nije otkrivena upotreba tema skupa,
-### procenat ucesnika koji su upotrebili jednak broj tema (ili nijednu) pre i tokom skupa je ~49%, dok
-### je procenat onih koji su upotrebili jednu temu manje ili vise ~31%.
+### procenat ucesnika koji nisu upotrebili nijednu novu temu u toku skupa je ~49% (to su ucesnici kod 
+### kojih je detektovana upotreba tema, ali bez promene u toku skupa u odnosu na upotrebu pre skupa, i 
+### ucesnici kod kojih nije detektovana upotreba tema skupa), dok je procenat onih koji su upotrebili 
+### jednu temu manje ili vise ~31%.
 
 
-### Broj pojavljivanja pojedinacnih bigrama: 
+### Iz prethodnog grafikona se vidi ukupan broj tema koje su ucesnici koristili, odnosno da li su ukupno
+### koristili vise ili manje tema za vreme skupa, ali ne moze se reci da su neki odredeni bigram koristili
+### vise ili manje u toku skupa, odnosno da li su ga "naucili". U sledecem grafikonu se posmatraju sve 
+### razlicite kombinacije ucesnik-tema, odnosno upotreba pojedinacnih bigrama po pojedinacnim ucesnicima.
 
 table(learning_specific_ngrams$learned)
 
 pdf("visuals/text3_bigram_frequency.pdf")
 ggplot(learning_specific_ngrams, aes(learned)) +
   geom_histogram(binwidth = 1, colour =  "black", fill = "red", alpha = 0.3)+
-  labs(title = "\"learned\" index distribution:\nuse frequency of a specific bigram", 
-       x = "lesser/greater use frequency", y = "bigram use by participants") +
+  labs(title = "\"learned\" index distribution:\nuse frequency of a specific topic bigram by a specific participant", 
+       x = "lesser/greater use frequency", y = "bigram use by different participants") +
   scale_x_continuous(breaks = c(-5:8)) +
   theme(plot.title = element_text(face = "bold", hjust = 0.5)) 
 dev.off()
 
 
-### Ako se pogledaju rezultati za "ucenje" pojedinacnih n-grama, prosecan bigram nije upotrebljavan vise 
-### u toku skupa u odnosu na period pre skupa, a znacajan je i broj bigrama koji su upotrebljeni jednom
-### vise u toku skupa.
+### Ako se pogledaju rezultati za "ucenje" pojedinacnih tema od strane razlicitih ucesnika, prosecan 
+### bigram prosecan ucesnik nije upotrebio vise u toku skupa u odnosu na period pre skupa, a znacajan je 
+### i broj bigrama koje su ucesnici upotrebili jednom vise u toku skupa.
 
 
 
@@ -364,7 +375,7 @@ learning_different_ngrams %>% mutate(retained = ifelse(is.nan(retained), myNaN,
                                                        ifelse(retained == Inf, myInf, retained))) %>%
   ggplot(aes(retained)) +
   geom_histogram(binwidth = 0.25, colour =  "black", fill = "red", alpha = 0.3)+
-  labs(title = "\"retained\" index distribution:\nnumber of bigrams used after conference", 
+  labs(title = "\"retained\" index distribution:\nnumber of topic bigrams used after conference", 
        x = "\"retained\" index", y = "participant count") +
   scale_x_continuous(breaks = c(-1, 0, 0.5, 1, 2, 3, 4.5),
                      labels = c("never used any\nduring or after", "forgot all\nbigrams",
@@ -377,21 +388,23 @@ dev.off()
 
 
 ### Medu ovim vrednostima ima 119 NA, - "jednake neupotrebe" (0/0), odnosno toliko ucesnika nije upotrebilo
-### nijedan bigram ni tokom ni posle skupa (ovo bi teoretski trebalo da se poklopi sa brojem ucesnika koji su  
-### upotrebili bigram pre skupa, a tokom i posle skupa nisu, odnosno sa onima koji na grafikonu za "learned"
-### index imaju negativan skor; medutim, posto sam uzimala celobrojni deo proseka upotrebe u periodima 1 i 2,
-### ucesnici koji su samo u jednom periodu upotrebili jedan bigram, imaju i za tu vrednost nulu, isto kao i 
-### za period posle skupa); 140 ucesnika je "zaboravilo" sve bigrame, odnosno ne koristi ih posle skupa,
-### dok 26 njih pokazuje razlicite stepene smanjene upotrebe; 28 njih koristi isti broj bigrama i posle i
-### tokom skupa; 38 ucesnika ima vrednost Inf, jos 18 ima skor > 1, odnosno oni koriste vise bigrama u 
-### periodu posle skupa.
+### nijedan bigram (temu) ni tokom ni posle skupa (ovo bi teoretski trebalo da se poklopi sa brojem ucesnika 
+### koji su upotrebili bigram pre skupa, a tokom i posle skupa nisu, odnosno sa onima koji na grafikonu za 
+### "learned" index imaju negativan skor; medutim, posto sam uzimala celobrojni deo proseka upotrebe u 
+### periodima 1 i 2, ucesnici koji su samo u jednom periodu upotrebili jedan bigram (temu), imaju i za tu 
+### vrednost nulu, isto kao i za period posle skupa); 140 ucesnika je "zaboravilo" sve bigrame, odnosno ne 
+### koristi ih posle skupa, dok 26 njih pokazuje razlicite stepene smanjene upotrebe; 28 njih koristi isti 
+### broj tema i posle i tokom skupa; 38 ucesnika ima vrednost Inf, jos 18 ima skor > 1, odnosno oni koriste 
+### vise bigrama u periodu posle skupa.
 ### Ako bi se ovim ucesnicima dodali i oni za koje nije otkrivena upotreba tema skupa (oni bi pripadali grupi
 ### "jednake neupotrebe"), moglo bi se reci da ~76% svih ucesnika nije upotrebilo nijedu temu posle skupa (bez
 ### obzira na to da li su ih koristili u toku skupa ili ne).
 
 
-
-### Broj pojavljivanja bigrama:
+### Kao i kod "naucenih" tema, i ovde se u prethodnom grafikonu radilo o ukupnom broju "naucenih" tema po 
+### ucesniku, ali se ne pravi razlika izmedu pojedinacnih tema - da li su iste teme koje su koriscene u toku
+### skupa ostale u upotrebi i posle skupa ili se mozda radi o potpuno razlicitim temama. U sledecem grafikonu
+### posmatraju se razlicite kombinacije ucesnik-bigram i njihovo pojavljivanje posle i tokom skupa.
 
 summary(learning_specific_ngrams$retained)
 table(round(learning_specific_ngrams$retained, 1))
@@ -405,8 +418,8 @@ learning_specific_ngrams %>% mutate(retained = ifelse(is.nan(retained), myNaN,
                                                        ifelse(retained == Inf, myInf2, retained))) %>%
   ggplot(aes(retained)) +
   geom_histogram(binwidth = 0.25, colour =  "black", fill = "red", alpha = 0.3) +
-  labs(title = "\"retained\" index distribution:\nuse frequency of a specific bigram", 
-       x = "\"retained\" index", y = "bigram use by participants") + 
+  labs(title = "\"retained\" index distribution:\nuse frequency of a specific topic bigram by a specific participant", 
+       x = "\"retained\" index", y = "bigram use by different participants") + 
   scale_x_continuous(breaks = c(-1, 0, 0.5, 1, 2, 5, 7),
                      labels = c("never used\nduring or after", "not used\nafter",
                                 "some use\nafter", "used equally\nafter",
@@ -416,13 +429,16 @@ learning_specific_ngrams %>% mutate(retained = ifelse(is.nan(retained), myNaN,
         axis.text.x = element_text(angle = 45))
 dev.off()
 
-### Sto se tice upotrebe pojedinacnih bigrama, u 822 slucaja, ucesnici nisu upotrebili bigram ni tokom 
-### ni posle skupa; u 527 slucajeva su ucesnici "zaboravili" bigrame koje su koristili u vreme skupa,
-### a u 10 slucajeva su ih manje koristili; u 13 slucajeva su korisnici u jednakoj meri koristili neki
-### bigram tokom i posle skupa; u 67 slucajeva, ucesnici su posle skupa poceli da koriste odredene bigrame.
+### Sto se tice upotrebe pojedinacnih bigrama od strane razlicitih ucesnika, u 822 slucaja ucesnici nisu 
+### upotrebili bigram (temu) ni tokom ni posle skupa; u 527 slucajeva su ucesnici "zaboravili" bigrame koje 
+### su koristili u vreme skupa, a u 10 slucajeva su ih manje koristili; u 13 slucajeva su korisnici u jednakoj 
+### meri koristili neku temu tokom i posle skupa; u 67 slucajeva, ucesnici su posle skupa poceli da koriste 
+### odredene bigrame (teme).
 
-### Moglo bi se reci da preko 90% bigrama, odnosno tema skupa, nije upotrebljeno od strane pojedinacnih
-### ucesnika posle skupa (bilo da je upotrebljeno u toku skupa ili ne).
+### Moglo bi se reci da u preko 90% slucajeva registrovane upotrebe, tema skupa nije upotrebljena od strane 
+### pojedinacnih ucesnika posle skupa (bilo da su je upotrebili u toku skupa ili ne, ali radi se o kombinacijama 
+### ucesnik-bigram koje su registrovane u bar jednom periodu, nerealno bi bilo uzeti u obzir sve moguce
+### kombinacije ucesnika i bigrama). 
 
 
 ### Na kraju, do nekakvih rezultata sam dosla, i oni ne daju narocito pozitivnu sliku o koriscenju novih 

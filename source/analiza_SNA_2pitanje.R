@@ -21,45 +21,47 @@ deg_dist <- lapply(conf_graph_list, function(x) {
 periods <- c("from 2017-04-21 to 2017-05-04", "from 2017-05-05 to 2017-05-18", "from 2017-05-19 to 2017-05-26", 
              "from 2017-05-27 to 2017-06-09", "from 2017-06-10 to 2017-06-23")
 
+### Funkcija degree.distribution vraca kao rezultat numericki vektor, cija je duzina vrednost maksimalnog stepena plus 
+### jedan: prvi element predstavlja frekvenciju cvorova sa stepenom 0, drugi frekvenciju cvorova sa stepenom 1 ... n-ti 
+### element frekvenciju cvorova sa stepenom n-1. Medutim, plot funkcija bi prvi element ovog vektora plotovala sa 
+### vrednostima x = 1 (stepen), y = distribucija[1] (frekvencija), sto u ovom slucaju ne odgovara. Zbog toga je 
+### grafikon prvo plotovan bez osa, koje se kasnije dodaju sa definisanim podeocima i nazivima podeoka (nazivi su 
+### (vrednost - 1), zbog razlike u indeksiranju kod ove dve funkcije).
+### Jos jedan problem sa ovim grafikonom se javlja zbog log-log skale: frekvencije koje imaju vrednost 0 ne mogu biti
+### plotovane (log(0) = -Inf), pa zbog toga dolazi do prekida u plotovanim linijama, narocito na desnoj strani
+### grafikona, gde je za mnoge vrednosti stepena frekvencija jednaka nuli. Ipak, i pored ovoga, logaritamska skala
+### daje adekvatan prikaz ovakve distribucije.
 
-# pdf("2_deg_distribution.pdf")
-# lapply(1:length(deg_dist), function(x){ 
-#   xmax <- max(sapply(deg_dist[[x]], length))
-#   ymax <- max(sapply(deg_dist[[x]], max))
-#   plot(c(0,xmax), c(0,ymax), type = "n", xlab = "degree", ylab = "frequency", 
-#        main = paste("Degree distribution\n", periods[x]) )
-#   lines(deg_dist[[x]]$dd_all, col = "red", lwd = 5)
-#   lines(deg_dist[[x]]$dd_in, col = "green", lwd = 3)
-#   lines(deg_dist[[x]]$dd_out, col = "purple", lwd = 2)
-#   legend("topright", legend = c("out degree", "in degree", "total degree"), lwd = c(2, 3, 5), 
-#          col = c("purple", "green", "red"))
-# })
-# dev.off()
-
-TODO # vrednosti stepena ne treba da krecu od 1, nego od 0..
 pdf("visuals/2_deg_distribution_log.pdf")
 lapply(1:length(deg_dist), function(x){ 
   xmax <- max(sapply(deg_dist[[x]], length))
   ymax <- max(sapply(deg_dist[[x]], max))
   plot(c(0.9,xmax), c(0.002,ymax), log = "xy", type = "n", xlab = "degree", ylab = "frequency", 
-       main = paste("Degree distribution\n", periods[x]) )
+       main = paste("Degree distribution\n", periods[x]), 
+        sub = "\nnote: due to log-log scale, zero frequencies are omitted; hence the unconnected dots", 
+       axes = FALSE )
   lines(deg_dist[[x]]$dd_all, col = "red", lwd = 2, type = "o")
   lines(deg_dist[[x]]$dd_in, col = "green", lwd = 2, type = "o")
   lines(deg_dist[[x]]$dd_out, col = "purple", lwd = 2, type = "o")
   legend("topright", legend = c("out degree", "in degree", "total degree"), lwd = c(2, 2, 2), 
          col = c("purple", "green", "red"))
+  axis(1, at = c(1, 2, 3, 4, 11, 101, xmax), labels = c(0, 1, 2, 3, 10, 100, xmax-1))
+  axis(2)
+  box()
+  
 })
 dev.off()
+
 
 
 ### Distribucije stepena prate "power law" distribuciju, odnosno najveci broj ucesnika ima veoma mali stepen, 
 ### a sa porastom stepena frekvencija naglo opada i pojavljuje se karakteristican dugacki "rep". Distribucije po
 ### vremenskim intervalima su dosta slicne, sa izuzetkom perioda u kome se odrzao skup, gde je broj ucesnika koji imaju
 ### odlazni (a time i ukupni) stepen jednak nuli - relativno blizu nule, odnosno, mala je frekvencija ucesnika koji 
-### nisu u tvitu pomenuli nekog drugog ucesnika, ali je velika frekvencija onih koji nisu pomenuti u tvitovima drugih,
-### onih ciji je dolazni stepen jednak nuli. Mali broj pominjanih ucesnika, kao i male vrednosti odlaznog stepena za veliku
-### vecinu ucesnika ukazuju na to da je komponenta u kojoj ucestvuje 97% svih cvorova zapravo vise proizvod posrednih, 
-### a ne direktnih veza medu ucesnicima.
+### nisu u tvitu pomenuli nekog drugog ucesnika (time je i malo onih koji nemaju bilo kakvu vezu - odlaznu ili dolaznu),
+### ali je velika frekvencija onih koji nisu pomenuti u tvitovima drugih, onih ciji je dolazni stepen jednak nuli. 
+### Mali broj pominjanih ucesnika, kao i male vrednosti odlaznog stepena za veliku vecinu ucesnika ukazuju na to da je
+### komponenta u kojoj ucestvuje 97% svih cvorova zapravo vise proizvod posrednih, a ne direktnih veza medu ucesnicima.
 
 conf_v_degs <- lapply(conf_graph_list, function(x) { 
   res <- list()
@@ -82,10 +84,10 @@ conf_degs_anlys_mat <- matrix(unlist(conf_degs_anlys), ncol = 3, byrow = TRUE, d
 
 
 ### Varijacije u stepenu su izrazene u periodu trajanja skupa, i to u odlaznom stepenu 5 jedinica, u dolaznom 
-### stepenu 13, sto govori o tome da se ucesnici mnogo vise razlikuju po ugledu nego po samom kvantitetu kontakata;
-### osim toga, varijacije u ukupnom stepenu su 18 jedinica, sto znaci da se ne radi o podeli ucesnika na one koji 
+### stepenu 13, sto govori o tome da se ucesnici mnogo vise razlikuju po ugledu nego po samom kvantitetu kontakata.
+### ???osim toga, varijacije u ukupnom stepenu su 18 jedinica, sto znaci da se ne radi o podeli ucesnika na one koji 
 ### imaju visok dolazni i one koji imaju visok odlazni stepen, vec na one koji imaju ukupan stepen visok i na one 
-### druge. 
+### druge. ???
 
 ### U graficki prikaz mreze sada moze da se ubaci i informacija o stepenu cvora. Za neki uopsteni pregled cu da prikazem 
 ### samo informaciju o ukupnom stepenu, dok bi se poredenjem odlaznog i dolaznog stepena mogao naslutiti uticaj 
@@ -110,12 +112,10 @@ dev.off()
 conf_transitivity <- sapply(conf_graph_list, transitivity, type = "global", isolates = NaN)
 # time_1 -> time_5 : 0.20504475 0.15757879 0.06979682 0.16435882 0.21428571 
 
-### Ovo je vrlo mala vrednost za period odrzavanja skupa. (neke vrednosti za poredenje?) Ali, ako se uzme u obzir razlika
-### velicina slabe i jake  maksimalne komponente (odnosno jednostrane i, uslovno receno, uzajamne komunikacije), onda 
-### ova brojka izgleda vrlo moguca i upucuje na strukturu bez mnogo klika ili jezgara. Dalje bi se mogle istraziti razlicite
-### metrike koje upucuju na strukturu mreze, kao sto su otkrivanje grupa i klastera i centralizovanost mreze. Ukoliko bi
-### se ispostavilo da je mreza u velikoj meri centralizovana, onda bi to moglo da objasni brzo nestajanje mreze posle
-### skupa, kada oni cvorovi koji su drzali mrezu "na okupu" izgube svoj uticaj.
+### Ovo je vrlo mala vrednost za period odrzavanja skupa i upucuje na strukturu bez mnogo klika ili jezgara. Dalje bi se 
+### mogle istraziti razlicite metrike koje upucuju na strukturu mreze, kao sto su otkrivanje grupa i klastera i 
+### centralizovanost mreze. Ukoliko bi se ispostavilo da je mreza u velikoj meri centralizovana, onda bi to moglo da 
+### objasni brzo nestajanje mreze posle skupa, kada oni cvorovi koji su drzali mrezu "na okupu" izgube svoj uticaj.
 
 
 ### Funkcije za nalazenje klika u igraph paketu tretiraju usmerene mreze kao neusmerene, uz poruku upozorenja - zbog toga

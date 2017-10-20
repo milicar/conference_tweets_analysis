@@ -3,7 +3,8 @@
 library(dplyr)
 library(stringr)
 library(tidytext)
-library(widyr)
+library(tidyr)
+
 
 ### U analizi teksta koristicu tvitove iz tabele selected_tweets, koja sadrzi tvitove prikupljene 
 ### za sve ucesnike koji ispunili sledece uslove: tvitovali su o skupu sa oznakama #WIELead ili @wieilc
@@ -177,7 +178,7 @@ prog_headings <- make_headings_df(prog_path)
 keywords <- prog_headings %>% group_by(track) %>% filter(!duplicated(text)) %>% 
   ungroup() %>% unnest_tokens(word, text, token = "words") %>% 
   anti_join(stop_words) %>%                                                  # izbacivanje stop-reci
-  filter(!str_detect(word, pattern = "^.{1,2}$|\\d")) %>%                    # izbacivanje reci kracih od 3 slova
+  filter(!str_detect(word, pattern = "^.{1,2}$|\\d")) %>%                    # izbacivanje reci kracih od 3 slova i brojeva
   filter(!word %in% (lexicon::common_names ))                                # izbacivanje licnih imena
 
 
@@ -231,7 +232,9 @@ conf_bigrams <- prog_headings %>% unnest_tokens(bigram, text, token = "ngrams", 
 ### samo znacenje glagola
 
 verbs_only <- lexicon::hash_grady_pos %>% group_by(word) %>% filter(all(str_detect(pos, "^Verb"))) 
-  
+ 
+### bigrami koji bi bili izbaceni ako bih izbacila one koji sadrze glagole:
+
 conf_bigrams %>%
   filter_at(vars(word1, word2), any_vars(. %in% (verbs_only$word )))
   
