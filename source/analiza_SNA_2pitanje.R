@@ -85,9 +85,9 @@ conf_degs_anlys_mat <- matrix(unlist(conf_degs_anlys), ncol = 3, byrow = TRUE, d
 
 ### Varijacije u stepenu su izrazene u periodu trajanja skupa, i to u odlaznom stepenu 5 jedinica, u dolaznom 
 ### stepenu 13, sto govori o tome da se ucesnici mnogo vise razlikuju po ugledu nego po samom kvantitetu kontakata.
-### ???osim toga, varijacije u ukupnom stepenu su 18 jedinica, sto znaci da se ne radi o podeli ucesnika na one koji 
-### imaju visok dolazni i one koji imaju visok odlazni stepen, vec na one koji imaju ukupan stepen visok i na one 
-### druge. ???
+### osim toga, varijacije u ukupnom stepenu su 18 jedinica, sto bi moglo da znaci da se ne radi o podeli ucesnika 
+### na one koji imaju visok dolazni i one koji imaju visok odlazni stepen, vec na one koji imaju ukupan stepen visok 
+### i na one druge. 
 
 ### U graficki prikaz mreze sada moze da se ubaci i informacija o stepenu cvora. Za neki uopsteni pregled cu da prikazem 
 ### samo informaciju o ukupnom stepenu, dok bi se poredenjem odlaznog i dolaznog stepena mogao naslutiti uticaj 
